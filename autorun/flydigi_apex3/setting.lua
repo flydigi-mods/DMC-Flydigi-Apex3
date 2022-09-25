@@ -1,5 +1,5 @@
 local file_path = "flydigi_apex3/setting.json"
-local fields_not_to_save = { reset_default = true, debug_console_enable = true}
+local fields_not_to_save = { reset_default = true, debug_console_enable = true, debug_window = true}
 local default_udp_port = 7878
 
 local default_setting = {
