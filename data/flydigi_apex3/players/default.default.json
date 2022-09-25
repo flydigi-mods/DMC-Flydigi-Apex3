@@ -1,0 +1,16 @@
+{
+    "actions": [
+        {
+            "trigger": {
+                "mode": "current"
+            },
+            "filters": [
+                {
+                    "key": "action",
+                    "op": "=",
+                    "value": "Wait"
+                }
+            ]
+        }
+    ]
+}

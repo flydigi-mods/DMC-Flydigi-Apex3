@@ -1,0 +1,40 @@
+{
+    "actions": [
+        {
+            "trigger": {
+                "mode": 2,
+                "params": [10, 1, 100, 20],
+                "duration": 1,
+                "after": {
+                    "mode": "default"
+                }
+            },
+            "filters": [
+                {
+                    "key": "action",
+                    "op": "in",
+                    "changed": true,
+                    "value": ["SnatchGround", "SnatchAir"]
+                }
+            ]
+        },
+        {
+            "trigger": {
+                "mode": 2,
+                "params": [10, 1, 100, 20],
+                "duration": 1,
+                "after": {
+                    "mode": "default"
+                }
+            },
+            "filters": [
+                {
+                    "key": "action",
+                    "op": "in",
+                    "changed": true,
+                    "value": ["BusterCatch", "BusterCatchAir"]
+                }
+            ]
+        }
+    ]
+}

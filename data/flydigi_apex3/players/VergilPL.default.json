@@ -1,0 +1,43 @@
+{
+    "actions": [
+        {
+            "trigger": {
+                "mode": 2,
+                "params": [10, 1, 100, 20],
+                "duration": 1,
+                "after": {
+                    "mode": "default"
+                }
+            },
+            "filters": [
+                {
+                    "key": "action",
+                    "op": "=",
+                    "changed": true,
+                    "value": "VMode"
+                }
+            ]
+        },
+        {
+            "trigger": {
+                "mode": 2,
+                "params": [70, 1, 5, 40],
+                "duration": 0.2,
+                "after": {
+                    "mode": "default"
+                }
+            },
+            "filters": [
+                {
+                    "key": "BeowulfChargeState",
+                    "op": "=",
+                    "value": 1
+                },
+                {
+                    "key": "BeowulfChargeLevel",
+                    "changed": true
+                }
+            ]
+        }
+    ]
+}
