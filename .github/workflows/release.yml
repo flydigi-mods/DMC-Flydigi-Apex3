@@ -1,0 +1,92 @@
+name: release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: flydigi
+      - name: version
+        id: version
+        run: |
+          cd flydigi
+          echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+          echo "::set-output name=date::$(date +'%Y%m%d')"
+          echo "::set-output name=tag::$(git describe --tags || git rev-parse --abbrev-ref HEAD)"
+          cd ..
+      - name: edit version for v tag
+        if: ${{ startsWith(steps.version.outputs.tag, 'v') }}
+        env:
+          version: ${{ steps.version.outputs.tag }}
+        run: |
+          touch flydigi/autorun/flydigi_apex3/version.lua
+          sed -i -e "s/developing/${version}/g" flydigi/autorun/flydigi_apex3/version.lua
+      - name: edit version for others
+        if: ${{ !startsWith(steps.version.outputs.tag, 'v') }}
+        env:
+          version: ${{ steps.version.outputs.tag }}${{ steps.version.outputs.hash }}@${{ steps.version.outputs.date }}
+        run: |
+          touch flydigi/autorun/flydigi_apex3/version.lua
+          sed -i -e "s/developing/${version}/g" flydigi/autorun/flydigi_apex3/version.lua
+      - run: |
+          mkdir -p stage/reframework
+          mkdir output
+          cp -R flydigi/autorun stage/reframework/autorun
+          cp -R flydigi/data stage/reframework/data
+      - uses: montudor/action-zip@v1
+      - working-directory: stage
+        run: zip -qq -r ../output/flydigi_apex3.zip .
+      - run: |
+          mkdir -p stage/reframework/plugins
+          mkdir deps
+      - uses: actions/checkout@v3
+        with:
+          repository: "cursey/reframework-d2d"
+          path: 'deps/d2d'
+      - uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'cursey/reframework-d2d'
+          file: 'REFramework-D2D.zip'
+          target: 'deps/d2d_dll.zip'
+      - uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq deps/d2d_dll.zip -d deps/d2d_dll
+      - uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'praydog/REFramework'
+          file: 'DMC5.zip'
+          target: 'deps/reframework.zip'
+      - uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq deps/reframework.zip -d deps/reframework
+      - run: |
+          cp deps/d2d_dll/reframework-d2d.dll stage/reframework/plugins/reframework-d2d.dll
+          cp -R deps/d2d/scripts/autorun/* stage/reframework/autorun/
+          rsync -a deps/reframework/dinput8.dll stage/
+      - working-directory: stage
+        run: zip -qq -r ../output/flydigi_apex3_all_in_one.zip .
+      - uses: actions/upload-artifact@v3
+        if: ${{ ! startsWith(steps.version.outputs.tag, 'v') }}
+        with:
+          name: flydigi_apex3
+          path: output/flydigi_apex3.zip
+          retention-days: 3
+      - uses: actions/upload-artifact@v3
+        if: ${{ ! startsWith(steps.version.outputs.tag, 'v') }}
+        with:
+          name: flydigi_apex3_all_in_one
+          path: output/flydigi_apex3_all_in_one.zip
+          retention-days: 3
+      - uses: softprops/action-gh-release@v1
+        if: ${{ startsWith(steps.version.outputs.tag, 'v') }}
+        with:
+          files: |
+            output/flydigi_apex3.zip
+            output/flydigi_apex3_all_in_one.zip
